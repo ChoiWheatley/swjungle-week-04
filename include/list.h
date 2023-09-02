@@ -62,3 +62,13 @@ void print_list(const NodePtr first) {
 
   printf("]\n");
 }
+
+/// @brief list의 노드 수를 반환하세요
+/// @param first nullable, 연결리스트의 첫번째 원소를 가리키는 포인터
+int __len__(const NodePtr first) {
+  int cnt = 0;
+  for (NodePtr cur = first; cur; cur = cur->link) {
+    cnt += 1;
+  }
+  return cnt;
+}
