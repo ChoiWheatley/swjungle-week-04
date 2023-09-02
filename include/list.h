@@ -30,3 +30,16 @@ void insert_left(NodePtr* first, int data) {
   newnode->link = oldnode;
   (*first)->link = newnode;
 }
+
+/// @brief first가 가리키고 있는 데이터를 연결해제 시킨 뒤 리턴한다.
+/// @param first nullable, 연결리스트의 첫번째 원소를 가리키는 포인터.
+/// @return first가 가리키고 있는 첫번째 원소 혹은 NULL을 리턴
+NodePtr pop_left(NodePtr* first) {
+  if (!(*first)) {
+    return NULL;
+  }
+  NodePtr trail = (*first)->link;
+  NodePtr ret = (*first);
+  (*first) = trail;
+  return ret;
+}
