@@ -43,3 +43,21 @@ NodePtr pop_left(NodePtr* first) {
   (*first) = trail;
   return ret;
 }
+
+/// @brief 순회를 하며 하나씩 출력한다.
+/// @param first nullable, 연결리스트의 첫번째 원소를 가리키는 포인터
+void print_list(const NodePtr first) {
+  if (!first) {
+    return;
+  }
+  printf("[");
+
+  for (NodePtr cur = first; cur; cur = cur->link) {
+    printf("%d", cur->data);
+    if (cur->link) {
+      printf(", ");
+    }
+  }
+
+  printf("]\n");
+}
