@@ -20,6 +20,24 @@ int main(void) {
   insert_left(&first, 50);
   print_list(first);
 
+  pop_left(&first);
+  print_list(first);
+
+  pop_left(&first);
+  print_list(first);
+
+  pop_left(&first);
+  print_list(first);
+
+  pop_left(&first);
+  print_list(first);
+
+  pop_left(&first);
+  print_list(first);
+
+  pop_left(&first);
+  print_list(first);
+
   free(first);
   return EXIT_SUCCESS;
 }

@@ -26,9 +26,9 @@ void insert_left(NodePtr* first, int data) {
     return;
   }
 
-  NodePtr oldnode = (*first)->link;
+  NodePtr oldnode = (*first);
   newnode->link = oldnode;
-  (*first)->link = newnode;
+  *first = newnode;
 }
 
 /// @brief first가 가리키고 있는 데이터를 연결해제 시킨 뒤 리턴한다.
@@ -48,6 +48,7 @@ NodePtr pop_left(NodePtr* first) {
 /// @param first nullable, 연결리스트의 첫번째 원소를 가리키는 포인터
 void print_list(const NodePtr first) {
   if (!first) {
+    printf("[]\n");
     return;
   }
   printf("[");
