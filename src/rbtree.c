@@ -82,43 +82,47 @@ void __rotate_rght(rbtree *t, node_t *u) {}
 
 void __transplant(rbtree *t, node_t *u, node_t *v) {}
 
-void travel_bfs(const rbtree *t, void (*callback)(const node_t *)) {
+void travel_bfs(const rbtree *t,
+                void (*callback)(const rbtree *t, const node_t *)) {
   Queue queue = {{NULL}, 0, 0};
   queue_push(&queue, t->root);
 
   while (!queue_empty(&queue)) {
     node_t *cur = queue_pop(&queue);
 
+    callback(t, cur);  // do visit
+
     if (cur == t->nil) {
       continue;
     }
-    callback(cur);  // do visit
 
     queue_push(&queue, cur->left);
     queue_push(&queue, cur->right);
   }
 }
 
-void travel_dfs(const rbtree *t, void (*callback)(const node_t *)) {}
+void travel_dfs(const rbtree *t,
+                void (*callback)(const rbtree *t, const node_t *)) {}
 
-void travel_bfs_mut(rbtree *t, void (*callback)(node_t *)) {
+void travel_bfs_mut(rbtree *t, void (*callback)(const rbtree *t, node_t *)) {
   Queue queue = {{NULL}, 0, 0};
   queue_push(&queue, t->root);
 
   while (!queue_empty(&queue)) {
     node_t *cur = queue_pop(&queue);
 
+    callback(t, cur);  // do visit
+
     if (cur == t->nil) {
       continue;
     }
-    callback(cur);  // do visit
 
     queue_push(&queue, cur->left);
     queue_push(&queue, cur->right);
   }
 }
 
-void travel_dfs_mut(rbtree *, void (*callback)(node_t *)) {}
+void travel_dfs_mut(rbtree *, void (*callback)(const rbtree *t, node_t *)) {}
 
 node_t *subtree_min(rbtree *t, node_t *u) { return NULL; }
 
@@ -127,7 +131,11 @@ node_t *subtree_max(rbtree *t, node_t *u) { return NULL; }
 void free_node(node_t *node) { free(node); }
 
 #ifdef DEBUG
-void print_node(const node_t *node) {
+void print_node(const rbtree *t, const node_t *node) {
+  if (node == t->nil) {
+    printf("NIL, ");
+    return;
+  }
   printf("%d(%c), ", node->key, node->color ? 'b' : 'r');
 }
 

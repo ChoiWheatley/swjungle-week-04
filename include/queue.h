@@ -3,9 +3,8 @@
  * Queue
  * @brief maxlength가 정해진 단순한 원형 큐
  */
+#include <rbtree.h>
 #include <stdbool.h>
-
-#include "rbtree.h"
 #define MAX_QUEUE 1000
 
 typedef struct node_q {

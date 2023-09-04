@@ -1,4 +1,4 @@
-#include "queue.h"
+#include <queue.h>
 
 bool queue_full(const Queue *queue) {
   return ((queue->tail + 1) % MAX_QUEUE) == queue->head;
