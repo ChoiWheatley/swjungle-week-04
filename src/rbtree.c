@@ -10,6 +10,29 @@
 
 #endif
 
+bool is_full(const Queue *queue) {
+  return ((queue->tail + 1) % MAX_QUEUE) == queue->head;
+}
+
+bool is_empty(const Queue *queue) { return queue->tail == queue->head; }
+
+void queue_push(Queue *queue, node_t *new) {
+  if (is_full(queue)) {
+    // full, discard head's element
+    queue->head = (queue->head + 1) % MAX_QUEUE;
+  }
+  queue->tail = (queue->tail + 1) % MAX_QUEUE;
+  queue->arrptr[queue->tail] = new;
+}
+
+node_t *queue_pop(Queue *queue) {
+  if (queue->head == queue->tail) {
+    // no element
+    return NULL;
+  }
+  queue->head = (queue->head + 1) % MAX_QUEUE;
+  return queue->arrptr[queue->head];
+}
 rbtree *new_rbtree(void) {
   rbtree *p = (rbtree *)malloc(sizeof(rbtree));
   p->nil = (node_t *)malloc(sizeof(node_t));
@@ -116,6 +139,12 @@ void print_node(const node_t *node) {
 
 /// @brief 단순 이진검색트리 삽입연산을 구현해보자.
 void bst_insert(rbtree *t, const key_t key) {
+  if (t->root == t->nil) {
+    // empty tree
+    t->root = (node_t *)malloc(sizeof(node_t));
+    *t->root = (node_t){RBTREE_BLACK, key, t->nil, t->nil, t->nil};
+    return;
+  }
   // node_t *cur = rbtree_find(t, key);
   node_t *cur = t->root;
   node_t *prev = cur;

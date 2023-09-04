@@ -29,8 +29,6 @@ int rbtree_erase(rbtree *, node_t *);
 
 int rbtree_to_array(const rbtree *, key_t *, const size_t);
 
-#endif  // _RBTREE_H_
-
 /**
  * Queue
  * @brief maxlength가 정해진 단순한 원형 큐
@@ -44,29 +42,11 @@ typedef struct node_q {
   int tail;
 } Queue;
 
-bool is_full(const Queue *queue) {
-  return ((queue->tail + 1) % MAX_QUEUE) == queue->head;
-}
+bool is_full(const Queue *queue);
+bool is_empty(const Queue *queue);
+void queue_push(Queue *queue, node_t *new);
+node_t *queue_pop(Queue *queue);
 
-bool is_empty(const Queue *queue) { return queue->tail == queue->head; }
-
-void queue_push(Queue *queue, node_t *new) {
-  if (is_full(queue)) {
-    // full, discard head's element
-    queue->head = (queue->head + 1) % MAX_QUEUE;
-  }
-  queue->tail = (queue->tail + 1) % MAX_QUEUE;
-  queue->arrptr[queue->tail] = new;
-}
-
-node_t *queue_pop(Queue *queue) {
-  if (queue->head == queue->tail) {
-    // no element
-    return NULL;
-  }
-  queue->head = (queue->head + 1) % MAX_QUEUE;
-  return queue->arrptr[queue->head];
-}
 /**
  * helper functions
  */
@@ -84,4 +64,6 @@ void free_node(node_t *node);
 #ifdef DEBUG
 void print_node(const node_t *node);
 void bst_insert(rbtree *t, const key_t key);
-#endif
+#endif  // DEBUG
+
+#endif  // _RBTREE_H_
