@@ -3,6 +3,8 @@
 #include <stdbool.h>
 #include <stdlib.h>
 
+#include "queue.h"
+
 #ifdef DEBUG
 
 #include <printers.h>
@@ -10,29 +12,6 @@
 
 #endif
 
-bool is_full(const Queue *queue) {
-  return ((queue->tail + 1) % MAX_QUEUE) == queue->head;
-}
-
-bool is_empty(const Queue *queue) { return queue->tail == queue->head; }
-
-void queue_push(Queue *queue, node_t *new) {
-  if (is_full(queue)) {
-    // full, discard head's element
-    queue->head = (queue->head + 1) % MAX_QUEUE;
-  }
-  queue->tail = (queue->tail + 1) % MAX_QUEUE;
-  queue->arrptr[queue->tail] = new;
-}
-
-node_t *queue_pop(Queue *queue) {
-  if (queue->head == queue->tail) {
-    // no element
-    return NULL;
-  }
-  queue->head = (queue->head + 1) % MAX_QUEUE;
-  return queue->arrptr[queue->head];
-}
 rbtree *new_rbtree(void) {
   rbtree *p = (rbtree *)malloc(sizeof(rbtree));
   p->nil = (node_t *)malloc(sizeof(node_t));
@@ -107,7 +86,7 @@ void travel_bfs(const rbtree *t, void (*callback)(const node_t *)) {
   Queue queue = {{NULL}, 0, 0};
   queue_push(&queue, t->root);
 
-  while (!is_empty(&queue)) {
+  while (!queue_empty(&queue)) {
     node_t *cur = queue_pop(&queue);
 
     if (cur == t->nil) {
@@ -122,7 +101,22 @@ void travel_bfs(const rbtree *t, void (*callback)(const node_t *)) {
 
 void travel_dfs(const rbtree *t, void (*callback)(const node_t *)) {}
 
-void travel_bfs_mut(rbtree *, void (*callback)(node_t *)) {}
+void travel_bfs_mut(rbtree *t, void (*callback)(node_t *)) {
+  Queue queue = {{NULL}, 0, 0};
+  queue_push(&queue, t->root);
+
+  while (!queue_empty(&queue)) {
+    node_t *cur = queue_pop(&queue);
+
+    if (cur == t->nil) {
+      continue;
+    }
+    callback(cur);  // do visit
+
+    queue_push(&queue, cur->left);
+    queue_push(&queue, cur->right);
+  }
+}
 
 void travel_dfs_mut(rbtree *, void (*callback)(node_t *)) {}
 

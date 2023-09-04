@@ -30,24 +30,6 @@ int rbtree_erase(rbtree *, node_t *);
 int rbtree_to_array(const rbtree *, key_t *, const size_t);
 
 /**
- * Queue
- * @brief maxlength가 정해진 단순한 원형 큐
- */
-#include <stdbool.h>
-#define MAX_QUEUE 100
-
-typedef struct node_q {
-  node_t *arrptr[MAX_QUEUE];
-  int head;
-  int tail;
-} Queue;
-
-bool is_full(const Queue *queue);
-bool is_empty(const Queue *queue);
-void queue_push(Queue *queue, node_t *new);
-node_t *queue_pop(Queue *queue);
-
-/**
  * helper functions
  */
 
