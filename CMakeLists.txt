@@ -12,7 +12,8 @@ set(CMAKE_BINARY_DIR bin)
 set(SRC_TARGET ${CMAKE_PROJECT_NAME})
 set(LIB_TARGET lib${CMAKE_PROJECT_NAME})
 
-add_compile_options(-Wall -fno-builtin -O0 -DSENTINEL)
+add_compile_options(-Wall -fno-builtin -O0)
+add_compile_definitions(DEBUG SENTINEL)
 
 include_directories("include")
 file(GLOB_RECURSE SOURCE_FILES CONFIGURE_DEPENDS "main.c")
