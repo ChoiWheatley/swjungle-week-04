@@ -29,4 +29,16 @@ int rbtree_erase(rbtree *, node_t *);
 
 int rbtree_to_array(const rbtree *, key_t *, const size_t);
 
+/**
+ * helper functions
+ */
+
+void __rotate_left(rbtree *, node_t *u);
+void __rotate_rght(rbtree *, node_t *u);
+void __transplant(rbtree *, node_t *u, node_t *v);
+void travel_bfs(const rbtree *, void (*callback)(const node_t *));
+void travel_dfs(const rbtree *, void (*callback)(const node_t *));
+node_t *subtree_min(rbtree *, node_t *u);
+node_t *subtree_max(rbtree *, node_t *u);
+
 #endif  // _RBTREE_H_

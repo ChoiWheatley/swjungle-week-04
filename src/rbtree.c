@@ -42,3 +42,17 @@ int rbtree_to_array(const rbtree *t, key_t *arr, const size_t n) {
   // TODO: implement to_array
   return 0;
 }
+
+void __rotate_left(rbtree *t, node_t *u) {}
+
+void __rotate_rght(rbtree *t, node_t *u) {}
+
+void __transplant(rbtree *t, node_t *u, node_t *v) {}
+
+void travel_bfs(const rbtree *t, void (*callback)(const node_t *)) {}
+
+void travel_dfs(const rbtree *t, void (*callback)(const node_t *)) {}
+
+node_t *subtree_min(rbtree *t, node_t *u) { return NULL; }
+
+node_t *subtree_max(rbtree *t, node_t *u) { return NULL; }
