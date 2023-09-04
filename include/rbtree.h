@@ -44,7 +44,7 @@ void travel_bfs_mut(rbtree *, void (*callback)(const rbtree *t, node_t *));
 void travel_dfs_mut(rbtree *, void (*callback)(const rbtree *t, node_t *));
 node_t *subtree_min(rbtree *, node_t *u);
 node_t *subtree_max(rbtree *, node_t *u);
-void free_node(node_t *node);
+void free_node(const rbtree *t, node_t *node);
 #ifdef DEBUG
 void print_node(const rbtree *t, const node_t *node);
 void bst_insert(rbtree *t, const key_t key);

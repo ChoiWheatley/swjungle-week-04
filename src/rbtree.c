@@ -1,9 +1,9 @@
 #include "rbtree.h"
 
+#include <queue.h>
+#include <stack.h>
 #include <stdbool.h>
 #include <stdlib.h>
-
-#include "queue.h"
 
 #ifdef DEBUG
 
@@ -102,7 +102,24 @@ void travel_bfs(const rbtree *t,
 }
 
 void travel_dfs(const rbtree *t,
-                void (*callback)(const rbtree *t, const node_t *)) {}
+                void (*callback)(const rbtree *t, const node_t *)) {
+  Stack stack = {{NULL}, 0};
+  stack_push(&stack, t->root);
+
+  while (!stack_empty(&stack)) {
+    const node_t *cur = stack_pop(&stack);
+
+    // do visit
+    callback(t, cur);
+
+    if (cur == t->nil) {
+      continue;
+    }
+
+    stack_push(&stack, cur->left);
+    stack_push(&stack, cur->right);
+  }
+}
 
 void travel_bfs_mut(rbtree *t, void (*callback)(const rbtree *t, node_t *)) {
   Queue queue = {{NULL}, 0, 0};
@@ -128,7 +145,7 @@ node_t *subtree_min(rbtree *t, node_t *u) { return NULL; }
 
 node_t *subtree_max(rbtree *t, node_t *u) { return NULL; }
 
-void free_node(node_t *node) { free(node); }
+void free_node(const rbtree *t, node_t *node) { free(node); }
 
 #ifdef DEBUG
 void print_node(const rbtree *t, const node_t *node) {

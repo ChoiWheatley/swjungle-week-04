@@ -15,5 +15,5 @@ typedef struct node_stack {
 
 bool stack_full(const Stack *stack);
 bool stack_empty(const Stack *stack);
-void stack_push(Stack *stack, node_t *new);
+bool stack_push(Stack *stack, node_t *new);
 node_t *stack_pop(Stack *stack);
