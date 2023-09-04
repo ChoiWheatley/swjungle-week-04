@@ -30,3 +30,58 @@ int rbtree_erase(rbtree *, node_t *);
 int rbtree_to_array(const rbtree *, key_t *, const size_t);
 
 #endif  // _RBTREE_H_
+
+/**
+ * Queue
+ * @brief maxlength가 정해진 단순한 원형 큐
+ */
+#include <stdbool.h>
+#define MAX_QUEUE 100
+
+typedef struct node_q {
+  node_t *arrptr[MAX_QUEUE];
+  int head;
+  int tail;
+} Queue;
+
+bool is_full(const Queue *queue) {
+  return ((queue->tail + 1) % MAX_QUEUE) == queue->head;
+}
+
+bool is_empty(const Queue *queue) { return queue->tail == queue->head; }
+
+void queue_push(Queue *queue, node_t *new) {
+  if (is_full(queue)) {
+    // full, discard head's element
+    queue->head = (queue->head + 1) % MAX_QUEUE;
+  }
+  queue->tail = (queue->tail + 1) % MAX_QUEUE;
+  queue->arrptr[queue->tail] = new;
+}
+
+node_t *queue_pop(Queue *queue) {
+  if (queue->head == queue->tail) {
+    // no element
+    return NULL;
+  }
+  queue->head = (queue->head + 1) % MAX_QUEUE;
+  return queue->arrptr[queue->head];
+}
+/**
+ * helper functions
+ */
+
+void __rotate_left(rbtree *, node_t *u);
+void __rotate_rght(rbtree *, node_t *u);
+void __transplant(rbtree *, node_t *u, node_t *v);
+void travel_bfs(const rbtree *, void (*callback)(const node_t *));
+void travel_dfs(const rbtree *, void (*callback)(const node_t *));
+void travel_bfs_mut(rbtree *, void (*callback)(node_t *));
+void travel_dfs_mut(rbtree *, void (*callback)(node_t *));
+node_t *subtree_min(rbtree *, node_t *u);
+node_t *subtree_max(rbtree *, node_t *u);
+void free_node(node_t *node);
+#ifdef DEBUG
+void print_node(const node_t *node);
+void bst_insert(rbtree *t, const key_t key);
+#endif

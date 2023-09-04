@@ -1,5 +1,6 @@
 #include "rbtree.h"
 
+#include <stdbool.h>
 #include <stdlib.h>
 
 #ifdef DEBUG
@@ -7,25 +8,6 @@
 #include <printers.h>
 #include <stdio.h>
 
-#endif
-
-/**
- * helper functions
- */
-
-void __rotate_left(rbtree *, node_t *u);
-void __rotate_rght(rbtree *, node_t *u);
-void __transplant(rbtree *, node_t *u, node_t *v);
-void travel_bfs(const rbtree *, void (*callback)(const node_t *));
-void travel_dfs(const rbtree *, void (*callback)(const node_t *));
-void travel_bfs_mut(rbtree *, void (*callback)(node_t *));
-void travel_dfs_mut(rbtree *, void (*callback)(node_t *));
-node_t *subtree_min(rbtree *, node_t *u);
-node_t *subtree_max(rbtree *, node_t *u);
-void free_node(node_t *node);
-#ifdef DEBUG
-void print_node(const node_t *node);
-void bst_insert(rbtree *t, const key_t key);
 #endif
 
 rbtree *new_rbtree(void) {
@@ -51,8 +33,11 @@ node_t *rbtree_insert(rbtree *t, const key_t key) {
   return t->root;
 }
 
+/// @brief find should return the node with the key or NULL if no such node
+/// exists
 node_t *rbtree_find(const rbtree *t, const key_t key) {
   node_t *cursor = t->root;
+  node_t *prev = NULL;
 
   while (cursor != t->nil && cursor->key == key) {
     if (key < cursor->key) {
@@ -66,7 +51,7 @@ node_t *rbtree_find(const rbtree *t, const key_t key) {
       return cursor;
     }
   }
-  return t->nil;
+  return NULL;
 }
 
 node_t *rbtree_min(const rbtree *t) {
@@ -95,7 +80,22 @@ void __rotate_rght(rbtree *t, node_t *u) {}
 
 void __transplant(rbtree *t, node_t *u, node_t *v) {}
 
-void travel_bfs(const rbtree *t, void (*callback)(const node_t *)) {}
+void travel_bfs(const rbtree *t, void (*callback)(const node_t *)) {
+  Queue queue = {{NULL}, 0, 0};
+  queue_push(&queue, t->root);
+
+  while (!is_empty(&queue)) {
+    node_t *cur = queue_pop(&queue);
+
+    if (cur == t->nil) {
+      continue;
+    }
+    callback(cur);  // do visit
+
+    queue_push(&queue, cur->left);
+    queue_push(&queue, cur->right);
+  }
+}
 
 void travel_dfs(const rbtree *t, void (*callback)(const node_t *)) {}
 
@@ -110,8 +110,42 @@ node_t *subtree_max(rbtree *t, node_t *u) { return NULL; }
 void free_node(node_t *node) { free(node); }
 
 #ifdef DEBUG
-void print_node(const node_t *node) { printf("%d, ", node->key); }
+void print_node(const node_t *node) {
+  printf("%d(%c), ", node->key, node->color ? 'b' : 'r');
+}
 
 /// @brief 단순 이진검색트리 삽입연산을 구현해보자.
-void bst_insert(rbtree *t, const key_t key) {}
+void bst_insert(rbtree *t, const key_t key) {
+  // node_t *cur = rbtree_find(t, key);
+  node_t *cur = t->root;
+  node_t *prev = cur;
+
+  while (cur != t->nil && cur->key != key) {
+    prev = cur;
+    if (key < cur->key) {
+      // go left
+      cur = cur->left;
+    } else if (key > cur->key) {
+      // go right
+      cur = cur->right;
+    } else {
+      // found!
+      break;
+    }
+  }
+  if (cur != t->nil) {
+    fprintf(stderr, "Currently key duplication not supported!\n END PROGRAM");
+    exit(EXIT_FAILURE);
+  }
+  // let's create NEW node
+  node_t *new = (node_t *)malloc(sizeof(node_t));
+  *new = (node_t){RBTREE_RED, key, cur->parent, t->nil, t->nil};
+  if (prev->key < key) {
+    // set as right child
+    prev->right = new;
+  } else {
+    // set as left child
+    prev->left = new;
+  }
+}
 #endif
