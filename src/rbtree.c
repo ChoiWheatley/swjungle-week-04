@@ -32,9 +32,50 @@ void delete_rbtree(rbtree *t) {
   free(t);
 }
 
+/// @brief RBTree 제약조건을 만족시키는 이진검색트리 삽입을 구현하세요.
+/// @return 새로 생성된 노드의 주소
 node_t *rbtree_insert(rbtree *t, const key_t key) {
-  // TODO: implement insert
-  return t->root;
+  if (t->root == t->nil) {
+    // empty tree
+    t->root = (node_t *)malloc(sizeof(node_t));
+    *t->root = (node_t){RBTREE_BLACK, key, t->nil, t->nil, t->nil};
+    return t->root;
+  }
+
+  // 순회 돌면서 NIL까지 간다. 중복을 발견하면 오른쪽으로 이동.
+  node_t *cur = t->root;
+  node_t *prev = cur;
+
+  while (cur != t->nil) {
+    prev = cur;
+    if (key < cur->key) {
+      // go left
+      cur = cur->left;
+    } else {
+      // go right
+      cur = cur->right;
+    }
+  }
+
+  // let's create NEW node
+  node_t *new = (node_t *)malloc(sizeof(node_t));
+  *new = (node_t){.color = RBTREE_RED,
+                  .key = key,
+                  .parent = prev,
+                  .left = t->nil,
+                  .right = t->nil};
+  if (key < prev->key) {
+    // set as left child
+    prev->left = new;
+  } else {
+    prev->right = new;
+  }
+
+  // check if insertion violates imbalance
+  if (prev->color == RBTREE_RED && new->color == RBTREE_RED) {
+    rbtree_insert_fixup(t, new);
+  }
+  return new;
 }
 
 /// @brief find should return the node with the key or NULL if no such node
@@ -91,9 +132,98 @@ int rbtree_to_array(const rbtree *t, key_t *arr, const size_t n) {
   }
 }
 
+void rbtree_insert_fixup(rbtree *t, node_t *u) {
+  while (u != t->root && u->parent->color == RBTREE_RED) {
+    node_t *pu = u->parent;
+    node_t *gu = pu->parent;
+    node_t *uncle = gu->right;
+    if (pu == gu->right) {
+      uncle = gu->left;
+    }
+
+    switch (rbtree_insert_case(t, u, pu, gu, uncle)) {
+      /// ??r imbalance
+      /// 단순히 색깔만 바꿔주면 된다. 뒷일은 부모가 알아서 책임질거임.
+      case (InsertCase)LLr:
+      case (InsertCase)LRr:
+      case (InsertCase)RLr:
+      case (InsertCase)RRr: {
+        pu->color = RBTREE_BLACK;
+        uncle->color = RBTREE_BLACK;
+        gu->color = RBTREE_RED;
+        u = gu;
+        break;
+      }
+      /// ??b imbalance
+      /// 회전이 들어간다.
+      case (InsertCase)LRb: {
+        __rotate_left(t, pu);
+        node_t *tmp = u;
+        u = pu;
+        pu = tmp;
+        // intentional fallthrough to LLb
+      }
+      case (InsertCase)LLb: {
+        gu->color = RBTREE_RED;
+        pu->color = RBTREE_BLACK;
+        __rotate_right(t, gu);
+        break;
+      }
+      case (InsertCase)RLb: {
+        __rotate_right(t, pu);
+        node_t *tmp = u;
+        u = pu;
+        pu = tmp;
+        // intentional fallthrough to RRb
+      }
+      case (InsertCase)RRb: {
+        gu->color = RBTREE_RED;
+        pu->color = RBTREE_BLACK;
+        __rotate_left(t, gu);
+        break;
+      }
+    }
+  }
+  t->root->color = RBTREE_BLACK;
+}
+
+void rbtree_delete_fixup(rbtree *t, node_t *u) {}
+
+InsertCase rbtree_insert_case(rbtree *t, node_t *u, node_t *parent,
+                              node_t *grandparent, node_t *uncle) {
+  if (parent == grandparent->left) {
+    // L??
+    if (u == parent->left) {
+      // LL?
+      if (uncle->color == RBTREE_RED) {
+        return (InsertCase)LLr;
+      }
+      return (InsertCase)LLb;
+    }
+    // LR?
+    if (uncle->color == RBTREE_RED) {
+      return (InsertCase)LRr;
+    }
+    return (InsertCase)LRb;
+  }
+  // R??
+  if (u == parent->left) {
+    // RL?
+    if (uncle->color == RBTREE_RED) {
+      return (InsertCase)RLr;
+    }
+    return (InsertCase)RLb;
+  }
+  // RR?
+  if (uncle->color == RBTREE_RED) {
+    return (InsertCase)RRr;
+  }
+  return (InsertCase)RRb;
+}
+
 /// @brief 노드 u를 기준으로 왼쪽 회전을 수행
 void __rotate_left(rbtree *t, node_t *u) {
-  if (!t || !u || u == t->nil || u->left == t->nil) {
+  if (!t || !u || u == t->nil) {
     return;
   }
   if (u == t->root) {

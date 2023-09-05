@@ -30,9 +30,22 @@ int rbtree_erase(rbtree *, node_t *);
 int rbtree_to_array(const rbtree *, key_t *, const size_t);
 
 /**
+ * # Insert Imbalance Cases
+ *
+ * XYz의 의미: X, Y는 각각 grandparent입장에서 parent의 위치, parent 입장에서
+ * node의 위치를 나타낸다. z는 `b` 또는 `r`인데, 각각 uncle이 black node인지,
+ * red node인지를 나타낸다.
+ */
+typedef enum InsertCase { LLr, LRr, RLr, RRr, LLb, LRb, RLb, RRb } InsertCase;
+
+/**
  * helper functions
  */
 
+void rbtree_insert_fixup(rbtree *t, node_t *u);
+void rbtree_delete_fixup(rbtree *t, node_t *u);
+InsertCase rbtree_insert_case(rbtree *t, node_t *u, node_t *parent,
+                              node_t *grandparent, node_t *uncle);
 void __rotate_left(rbtree *, node_t *u);
 void __rotate_right(rbtree *, node_t *u);
 void __transplant(rbtree *, node_t *u, node_t *v);
