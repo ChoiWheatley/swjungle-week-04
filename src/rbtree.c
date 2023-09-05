@@ -101,9 +101,45 @@ node_t *rbtree_min(const rbtree *t) { return subtree_min(t, t->root); }
 
 node_t *rbtree_max(const rbtree *t) { return subtree_max(t, t->root); }
 
+/// @brief fixup 조건은 transplant 당한 노드의 색상이 black인 경우이다. 삭제시
+/// 노드의 자식이 둘일때 오른쪽 서브트리의 min을 찾아 transplant 한다.
+/// @return ??? 모르겠다 그냥 key 리턴해야쥐
 int rbtree_erase(rbtree *t, node_t *p) {
-  // TODO: implement erase
-  return 0;
+  color_t origin_color = p->color;
+  node_t *x = p->left;
+
+  if (p->left == t->nil) {
+    x = p->right;
+    __transplant(t, p, p->right);
+  } else if (p->right == t->nil) {
+    x = p->left;
+    __transplant(t, p, p->left);
+  } else {
+    /**
+     * # left, right children exists
+     *
+     * 1. find minimum node(y) from right subtree
+     * 2. let x as y.right and transplant y, x even if x is NIL
+     * 3. transplant p, y so that p is finally replaced
+     */
+    node_t *y = subtree_min(t, p->right);
+    // Now we take care of y's subtree
+    origin_color = y->color;
+
+    x = y->right;
+
+    __transplant(t, y, x);
+    if (p->right == y) {
+      p->right = x;
+    }
+    __transplant(t, p, y);
+  }
+
+  if (origin_color == RBTREE_BLACK) {
+    rbtree_delete_fixup(t, x);
+  }
+
+  return p->key;
 }
 
 /// @brief Using DFS travelsal
@@ -123,6 +159,7 @@ int rbtree_to_array(const rbtree *t, key_t *arr, const size_t n) {
       cur = cur->right;
     }
   }
+  return n;
 }
 
 void rbtree_insert_fixup(rbtree *t, node_t *u) {
@@ -180,6 +217,7 @@ void rbtree_insert_fixup(rbtree *t, node_t *u) {
   t->root->color = RBTREE_BLACK;
 }
 
+/// @brief u 서브트리의 부족한 black노드를 메꾸기 위한 과정
 void rbtree_delete_fixup(rbtree *t, node_t *u) {}
 
 InsertCase rbtree_insert_case(rbtree *t, node_t *u, node_t *parent,
@@ -336,7 +374,7 @@ void travel_dfs_mut(rbtree *t, void (*callback)(const rbtree *, node_t *)) {
   }
 }
 
-node_t *subtree_min(rbtree *t, node_t *u) {
+node_t *subtree_min(const rbtree *t, node_t *u) {
   node_t *cur = t->root;
   node_t *prev = cur;
 
@@ -348,7 +386,7 @@ node_t *subtree_min(rbtree *t, node_t *u) {
   return prev;
 }
 
-node_t *subtree_max(rbtree *t, node_t *u) {
+node_t *subtree_max(const rbtree *t, node_t *u) {
   node_t *cur = t->root;
   node_t *prev = cur;
 
