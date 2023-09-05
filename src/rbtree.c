@@ -12,6 +12,8 @@
 
 #endif
 
+typedef void Fn(rbtree *, node_t *);
+
 rbtree *new_rbtree(void) {
   rbtree *p = (rbtree *)malloc(sizeof(rbtree));
   p->nil = (node_t *)malloc(sizeof(node_t));
@@ -70,9 +72,23 @@ int rbtree_erase(rbtree *t, node_t *p) {
   return 0;
 }
 
+/// @brief Using DFS travelsal
 int rbtree_to_array(const rbtree *t, key_t *arr, const size_t n) {
-  // TODO: implement to_array
-  return 0;
+  Stack stack = {{NULL}, 0};
+  node_t *cur = t->root;
+  size_t idx = 0;
+
+  while ((!stack_empty(&stack) || cur != t->nil) && idx < n) {
+    if (cur != t->nil) {
+      stack_push(&stack, cur);
+      cur = cur->left;
+    } else {
+      cur = stack_pop(&stack);
+      arr[idx] = cur->key;
+      idx += 1;
+      cur = cur->right;
+    }
+  }
 }
 
 void __rotate_left(rbtree *t, node_t *u) {}
