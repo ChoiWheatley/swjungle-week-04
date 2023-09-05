@@ -42,7 +42,7 @@ node_t *rbtree_insert(rbtree *t, const key_t key) {
 node_t *rbtree_find(const rbtree *t, const key_t key) {
   node_t *cursor = t->root;
 
-  while (cursor != t->nil && cursor->key == key) {
+  while (cursor != t->nil || cursor->key == key) {
     if (key < cursor->key) {
       // go left
       cursor = cursor->left;
@@ -112,7 +112,7 @@ void __rotate_left(rbtree *t, node_t *u) {
   right->left = u;
 }
 
-void __rotate_rght(rbtree *t, node_t *u) {
+void __rotate_right(rbtree *t, node_t *u) {
   if (!t || !u || u == t->nil) {
     return;
   }

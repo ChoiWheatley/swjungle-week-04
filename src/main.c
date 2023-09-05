@@ -61,14 +61,28 @@ int main(int argc, char *argv[]) {
 
   printf("\nvvv TEST LEFT ROTATION vvv\n");
   printf("BEFORE: \n");
-  travel_bfs(tree, print_node_verbose);
+  travel_bfs(tree, print_node);
 
   node_t *node2 = rbtree_find(tree, 2);
   assert(2 == node2->key);
   __rotate_left(tree, node2);
 
-  printf("AFTER:\n");
-  travel_bfs(tree, print_node_verbose);
+  printf("\nAFTER:\n");
+  travel_bfs(tree, print_node);
+  printf("\n^^^ END LEFT ROTATION ^^^\n");
+
+  printf("\nvvv TEST RIGHT ROTATION vvv\n");
+  node_t *node4 = rbtree_find(tree, 4);
+  assert(4 == node4->key);
+  __rotate_right(tree, node4);
+  travel_bfs(tree, print_node);
+  printf("\n^^^ END RIGHT ROTATION ^^^\n");
+
+  printf("\nvvv TEST LEFT ROTATION vvv\n");
+  node_t *node10 = rbtree_find(tree, 10);
+  assert(10 == node10->key);
+  __rotate_left(tree, node10);
+  travel_bfs(tree, print_node);
   printf("\n^^^ END LEFT ROTATION ^^^\n");
 
   return 0;
