@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "rbtree.h"
 
@@ -40,6 +41,22 @@ int main(int argc, char *argv[]) {
   travel_dfs(tree, print_node);
 
   printf("\n=== END TEST DFS ===\n");
+
+  printf("\nvvv TEST ARR vvv\n");
+  size_t len = 9;
+  key_t *arr = (key_t *)malloc(sizeof(key_t) * len);
+  rbtree_to_array(tree, arr, len);
+
+  printf("[");
+  for (size_t i = 0; i < len; ++i) {
+    printf("%d", arr[i]);
+    if (i < len - 1) {
+      printf(", ");
+    }
+  }
+  printf("]\n");
+  free(arr);
+  printf("\n^^^ END TEST ARR ^^^\n");
 
   return 0;
 }
