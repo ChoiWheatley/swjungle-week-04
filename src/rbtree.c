@@ -39,7 +39,6 @@ node_t *rbtree_insert(rbtree *t, const key_t key) {
 /// exists
 node_t *rbtree_find(const rbtree *t, const key_t key) {
   node_t *cursor = t->root;
-  node_t *prev = NULL;
 
   while (cursor != t->nil && cursor->key == key) {
     if (key < cursor->key) {
