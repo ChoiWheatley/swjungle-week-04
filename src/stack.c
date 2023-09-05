@@ -2,7 +2,7 @@
 
 bool stack_full(const Stack* stack) { return stack->top >= MAX_STACK; }
 
-bool stack_empty(const Stack* stack) { return stack->top == 0; }
+bool stack_empty(const Stack* stack) { return stack->top <= 0; }
 
 bool stack_push(Stack* stack, node_t* new) {
   if (stack_full(stack)) {

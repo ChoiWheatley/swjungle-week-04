@@ -36,5 +36,10 @@ int main(int argc, char *argv[]) {
   }
   printf("\n=== END TEST BST ADD ===\n");
 
+  printf("\n=== TEST DFS ===\n");
+  travel_dfs(tree, print_node);
+
+  printf("\n=== END TEST DFS ===\n");
+
   return 0;
 }

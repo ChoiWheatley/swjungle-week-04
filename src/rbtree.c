@@ -104,20 +104,17 @@ void travel_bfs(const rbtree *t,
 void travel_dfs(const rbtree *t,
                 void (*callback)(const rbtree *t, const node_t *)) {
   Stack stack = {{NULL}, 0};
-  stack_push(&stack, t->root);
+  node_t *cur = t->root;
 
-  while (!stack_empty(&stack)) {
-    const node_t *cur = stack_pop(&stack);
-
-    // do visit
-    callback(t, cur);
-
-    if (cur == t->nil) {
-      continue;
+  while (!stack_empty(&stack) || cur != t->nil) {
+    if (cur != t->nil) {
+      stack_push(&stack, cur);
+      cur = cur->left;
+    } else {
+      cur = stack_pop(&stack);
+      callback(t, cur);
+      cur = cur->right;
     }
-
-    stack_push(&stack, cur->left);
-    stack_push(&stack, cur->right);
   }
 }
 
