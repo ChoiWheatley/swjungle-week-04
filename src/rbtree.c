@@ -27,7 +27,6 @@ rbtree *new_rbtree(void) {
 }
 
 void delete_rbtree(rbtree *t) {
-  // TODO: DFS 순회를 돌면서 free를 해주자.
   travel_dfs_mut(t, free_node);
   free(t);
 }
@@ -256,7 +255,16 @@ void __rotate_right(rbtree *t, node_t *u) {
   left->right = u;
 }
 
-void __transplant(rbtree *t, node_t *u, node_t *v) {}
+/// @brief u 노드를 기존의 연결에서 제외하고 그 자리에 v를 넣는다.
+void __transplant(rbtree *t, node_t *u, node_t *v) {
+  node_t *parent = u->parent;
+  if (u == parent->left) {
+    parent->left = v;
+  } else {
+    parent->right = v;
+  }
+  v->parent = parent;
+}
 
 void travel_bfs(const rbtree *t,
                 void (*callback)(const rbtree *t, const node_t *)) {
