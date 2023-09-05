@@ -104,16 +104,16 @@ node_t *rbtree_max(const rbtree *t) { return subtree_max(t, t->root); }
 /// @brief fixup 조건은 transplant 당한 노드의 색상이 black인 경우이다. 삭제시
 /// 노드의 자식이 둘일때 오른쪽 서브트리의 min을 찾아 transplant 한다.
 /// @return ??? 모르겠다 그냥 key 리턴해야쥐
-int rbtree_erase(rbtree *t, node_t *p) {
-  color_t origin_color = p->color;
-  node_t *x = p->left;
+int rbtree_erase(rbtree *t, node_t *u) {
+  color_t origin_color = u->color;
+  node_t *x = u->left;
 
-  if (p->left == t->nil) {
-    x = p->right;
-    __transplant(t, p, p->right);
-  } else if (p->right == t->nil) {
-    x = p->left;
-    __transplant(t, p, p->left);
+  if (u->left == t->nil) {
+    x = u->right;
+    __transplant(t, u, u->right);
+  } else if (u->right == t->nil) {
+    x = u->left;
+    __transplant(t, u, u->left);
   } else {
     /**
      * # left, right children exists
@@ -122,24 +122,27 @@ int rbtree_erase(rbtree *t, node_t *p) {
      * 2. let x as y.right and transplant y, x even if x is NIL
      * 3. transplant p, y so that p is finally replaced
      */
-    node_t *y = subtree_min(t, p->right);
+    node_t *y = subtree_min(t, u->right);
     // Now we take care of y's subtree
     origin_color = y->color;
 
     x = y->right;
 
-    __transplant(t, y, x);
-    if (p->right == y) {
-      p->right = x;
-    }
-    __transplant(t, p, y);
+    __transplant(t, y, y->right);  // x might be NIL, that's ok
+    // prepare y's recapture u's position
+    y->right = u->right;
+    y->right->parent = y;
+    __transplant(t, u, y);
+    y->left = u->left;
+    y->left->parent = y;
+    y->color = u->color;
   }
 
   if (origin_color == RBTREE_BLACK) {
     rbtree_delete_fixup(t, x);
   }
 
-  return p->key;
+  return u->key;
 }
 
 /// @brief Using DFS travelsal
@@ -319,7 +322,7 @@ DeleteCase rbtree_delete_case(rbtree *t, node_t *u) {
   node_t *w = p->left;
   if (u == p->left) {
     // LType?
-    node_t *w = p->right;
+    w = p->right;
     if (w->color == RBTREE_RED) {
       return (DeleteCase)LType1;
     }
@@ -467,7 +470,7 @@ void travel_dfs_mut(rbtree *t, void (*callback)(const rbtree *, node_t *)) {
 }
 
 node_t *subtree_min(const rbtree *t, node_t *u) {
-  node_t *cur = t->root;
+  node_t *cur = u;
   node_t *prev = cur;
 
   while (cur != t->nil) {
