@@ -46,6 +46,7 @@ node_t *subtree_min(rbtree *, node_t *u);
 node_t *subtree_max(rbtree *, node_t *u);
 void free_node(const rbtree *t, node_t *node);
 #ifdef DEBUG
+void print_node_verbose(const rbtree *t, const node_t *node);
 void print_node(const rbtree *t, const node_t *node);
 void bst_insert(rbtree *t, const key_t key);
 #endif  // DEBUG

@@ -19,7 +19,7 @@ rbtree *new_rbtree(void) {
   p->nil = (node_t *)malloc(sizeof(node_t));
   (*p->nil) = (node_t){.color = RBTREE_BLACK,
                        .key = (1 << 31) - 1,
-                       .parent = NULL,
+                       .parent = p->nil,
                        .left = NULL,
                        .right = NULL};
   p->root = p->nil;
@@ -91,9 +91,40 @@ int rbtree_to_array(const rbtree *t, key_t *arr, const size_t n) {
   }
 }
 
-void __rotate_left(rbtree *t, node_t *u) {}
+/// @brief 노드 u를 기준으로 왼쪽 회전을 수행
+void __rotate_left(rbtree *t, node_t *u) {
+  if (!t || !u || u == t->nil) {
+    return;
+  }
+  node_t *right = u->right;
+  u->right = right->left;
+  right->left->parent = u;
+  if (u == u->parent->left) {
+    u->parent->left = right;
+  } else {
+    u->parent->right = right;
+  }
+  right->parent = u->parent;
+  u->parent = right;
+  right->left = u;
+}
 
-void __rotate_rght(rbtree *t, node_t *u) {}
+void __rotate_rght(rbtree *t, node_t *u) {
+  if (!t || !u || u == t->nil) {
+    return;
+  }
+  node_t *left = u->left;
+  u->left = left->right;
+  left->right->parent = u;
+  if (u == u->parent->left) {
+    u->parent->left = left;
+  } else {
+    u->parent->right = left;
+  }
+  left->parent = u->parent;
+  u->parent = left;
+  left->right = u;
+}
 
 void __transplant(rbtree *t, node_t *u, node_t *v) {}
 
@@ -194,6 +225,32 @@ node_t *subtree_max(rbtree *t, node_t *u) {
 void free_node(const rbtree *t, node_t *node) { free(node); }
 
 #ifdef DEBUG
+void print_node_verbose(const rbtree *t, const node_t *node) {
+#define MAX_STR 255
+
+  char skey[MAX_STR] = "NIL";
+  char sleft[MAX_STR] = "NIL";
+  char sright[MAX_STR] = "NIL";
+  char sparent[MAX_STR] = "NIL";
+  if (node == t->nil) {
+    printf("NIL\n");
+    return;
+  }
+  snprintf(skey, MAX_STR, "%d", node->key);
+  if (node->left != t->nil) {
+    snprintf(sleft, MAX_STR, "%d", node->left->key);
+  }
+  if (node->right != t->nil) {
+    snprintf(sright, MAX_STR, "%d", node->right->key);
+  }
+  if (node->parent != t->nil) {
+    snprintf(sparent, MAX_STR, "%d", node->parent->key);
+  }
+  printf("key: %s: (left: %s,right: %s, parent: %s)\n", skey, sleft, sright,
+         sparent);
+
+#undef MAX_STR
+}
 void print_node(const rbtree *t, const node_t *node) {
   if (node == t->nil) {
     printf("NIL, ");
@@ -233,7 +290,11 @@ void bst_insert(rbtree *t, const key_t key) {
   }
   // let's create NEW node
   node_t *new = (node_t *)malloc(sizeof(node_t));
-  *new = (node_t){RBTREE_RED, key, cur->parent, t->nil, t->nil};
+  *new = (node_t){.color = RBTREE_RED,
+                  .key = key,
+                  .parent = prev,
+                  .left = t->nil,
+                  .right = t->nil};
   if (prev->key < key) {
     // set as right child
     prev->right = new;

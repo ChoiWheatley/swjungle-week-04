@@ -1,3 +1,4 @@
+#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -57,6 +58,18 @@ int main(int argc, char *argv[]) {
   printf("]\n");
   free(arr);
   printf("\n^^^ END TEST ARR ^^^\n");
+
+  printf("\nvvv TEST LEFT ROTATION vvv\n");
+  printf("BEFORE: \n");
+  travel_bfs(tree, print_node_verbose);
+
+  node_t *node2 = rbtree_find(tree, 2);
+  assert(2 == node2->key);
+  __rotate_left(tree, node2);
+
+  printf("AFTER:\n");
+  travel_bfs(tree, print_node_verbose);
+  printf("\n^^^ END LEFT ROTATION ^^^\n");
 
   return 0;
 }
