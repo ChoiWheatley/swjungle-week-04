@@ -64,11 +64,11 @@ node_t *rbtree_insert(rbtree *t, const key_t key) {
                   .parent = prev,
                   .left = t->nil,
                   .right = t->nil};
-  if (prev->key < key) {
-    // set as right child
-    prev->right = new;
-  } else {
+  if (key < prev->key) {
+    // set as left child
     prev->left = new;
+  } else {
+    prev->right = new;
   }
 
   // check if insertion violates imbalance
