@@ -98,15 +98,9 @@ node_t *rbtree_find(const rbtree *t, const key_t key) {
   return NULL;
 }
 
-node_t *rbtree_min(const rbtree *t) {
-  // TODO: implement find
-  return t->root;
-}
+node_t *rbtree_min(const rbtree *t) { return subtree_min(t, t->root); }
 
-node_t *rbtree_max(const rbtree *t) {
-  // TODO: implement find
-  return t->root;
-}
+node_t *rbtree_max(const rbtree *t) { return subtree_max(t, t->root); }
 
 int rbtree_erase(rbtree *t, node_t *p) {
   // TODO: implement erase
@@ -359,6 +353,12 @@ node_t *subtree_max(rbtree *t, node_t *u) {
 }
 
 void free_node(const rbtree *t, node_t *node) { free(node); }
+
+int key_comp(const void *lhs, const void *rhs) {
+  key_t l = *(key_t *)lhs;
+  key_t r = *(key_t *)rhs;
+  return l - r;
+}
 
 #ifdef DEBUG
 void print_node_verbose(const rbtree *t, const node_t *node) {
