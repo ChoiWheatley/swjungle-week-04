@@ -16,26 +16,15 @@ typedef enum InsertCase { LLr, LRr, RLr, RRr, LLb, LRb, RLb, RRb } InsertCase;
  * # Delete Imbalance Cases
  *
  * 1. LType1: x's right sibling w is red
- *   → w의 색을 black으로 바꿔주기 위해 x.p에
- * left_rotate를 수행.
- *   → fallthrough to case 2, 3, 4
- *
  * 2. LType2: x's right sibling w is black, both of w's children are black
- *   → 잃어버린 black 하나를 x.p가 상환하도록 강제로 w를 red로 만들자.
- *   → continue to next iteration
- *
  * 3. LType3: x's right sibling w is black, left child of w is red, right child
  * of w is black
- *   → case 4로 만들기 위해 w를 기준으로 Right Rotation을 수행.
- *
  * 4. LType4: x's right sibling w is black, right child of w is red
- *   → red node를 적극적으로 활용해 추가 black을 확보한다.
- *
  * 5. RType1: x's left sibling w is red
  * 6. RType2: x's left sibling w is black, both of w's children are black
- * 7. RType3: x's left sibling w is black, left child of w is red, right child
+ * 7. RType3: x's left sibling w is black, right child of w is red, left child
  * of w is black
- * 8. RType4: x's left sibling w is black, right child of w is red
+ * 8. RType4: x's left sibling w is black, left child of w is red
  */
 typedef enum DeleteCase {
   LType1,
@@ -77,6 +66,26 @@ int rbtree_to_array(const rbtree *, key_t *, const size_t);
  */
 
 void rbtree_insert_fixup(rbtree *t, node_t *u);
+/**
+ * 1. LType1: x's right sibling w is red
+ *   → w의 색을 black으로 바꿔주기 위해 x.p에
+ * left_rotate를 수행.
+ *   → fallthrough to case 2, 3, 4
+ *
+ * 2. LType2: x's right sibling w is black, both of w's children are black
+ *   → 잃어버린 black 하나를 x.p가 상환하도록 강제로 w를 red로 만들자.
+ *   → continue to next iteration
+ *
+ * 3. LType3: x's right sibling w is black, left child of w is red, right child
+ * of w is black
+ *   → case 4로 만들기 위해 w를 기준으로 Right Rotation을 수행.
+ *
+ * 4. LType4: x's right sibling w is black, right child of w is red
+ *   → red node를 적극적으로 활용해 추가 black을 확보한다.
+ *
+ * RType 부터는 대칭임.
+ *
+ */
 void rbtree_delete_fixup(rbtree *t, node_t *u);
 InsertCase rbtree_insert_case(rbtree *t, node_t *u, node_t *parent,
                               node_t *grandparent, node_t *uncle);

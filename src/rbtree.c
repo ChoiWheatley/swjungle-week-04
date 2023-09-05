@@ -217,36 +217,69 @@ void rbtree_insert_fixup(rbtree *t, node_t *u) {
   t->root->color = RBTREE_BLACK;
 }
 
-/// @brief u 서브트리의 부족한 black노드를 메꾸기 위한 과정
 void rbtree_delete_fixup(rbtree *t, node_t *u) {
-  while (u != t->root && u->color == RBTREE_BLACK) {
-    switch (rbtree_delete_case(t, u)) {
-      case (DeleteCase)RType1: {
-        continue;
-      }
-      case (DeleteCase)RType2: {
-        continue;
-      }
-      case (DeleteCase)RType3: {
-        // intentional fallthrough
-      }
-      case (DeleteCase)RType4: {
-        break;
-      }
+  node_t *x = u;
+  while (x != t->root && x->color == RBTREE_BLACK) {
+    node_t *p = x->parent;
+    switch (rbtree_delete_case(t, x)) {
       case (DeleteCase)LType1: {
+        node_t *w = p->right;
+        w->color = p->color;
+        p->color = RBTREE_RED;
+        __rotate_left(t, p);
         continue;
       }
       case (DeleteCase)LType2: {
+        node_t *w = p->right;
+        w->color = RBTREE_RED;
+        x = p;
         continue;
       }
       case (DeleteCase)LType3: {
+        node_t *w = p->right;
+        w->left->color = RBTREE_BLACK;
+        w->color = RBTREE_RED;
+        __rotate_right(t, w);
         // intentional fallthrough
       }
       case (DeleteCase)LType4: {
-        break;
+        node_t *w = p->right;
+        w->right->color = RBTREE_BLACK;
+        w->color = p->color;
+        p->color = RBTREE_BLACK;
+        __rotate_left(t, p);
+        return;
+      }
+      case (DeleteCase)RType1: {
+        node_t *w = p->left;
+        w->color = p->color;
+        p->color = RBTREE_RED;
+        __rotate_right(t, p);
+        continue;
+      }
+      case (DeleteCase)RType2: {
+        node_t *w = p->left;
+        w->color = RBTREE_RED;
+        x = p;
+        continue;
+      }
+      case (DeleteCase)RType3: {
+        node_t *w = p->left;
+        w->right->color = RBTREE_BLACK;
+        w->color = RBTREE_RED;
+        __rotate_left(t, w);
+        // intentional fallthrough
+      }
+      case (DeleteCase)RType4: {
+        node_t *w = p->left;
+        w->left->color = RBTREE_BLACK;
+        p->color = RBTREE_BLACK;
+        __rotate_right(t, p);
+        return;
       }
     }
   }
+  x->color = RBTREE_BLACK;
 }
 
 InsertCase rbtree_insert_case(rbtree *t, node_t *u, node_t *parent,
@@ -298,14 +331,14 @@ DeleteCase rbtree_delete_case(rbtree *t, node_t *u) {
     }
     return (DeleteCase)LType2;
   }
-  // RType?
+  // RType? Type3, Type4가 LType과 반대라는 점 주의
   if (w->color == RBTREE_RED) {
     return (DeleteCase)RType1;
   }
-  if (w->right->color == RBTREE_RED) {
+  if (w->left->color == RBTREE_RED) {
     return (DeleteCase)RType4;
   }
-  if (w->left->color == RBTREE_RED) {
+  if (w->right->color == RBTREE_RED) {
     return (DeleteCase)RType3;
   }
   return (DeleteCase)RType2;
