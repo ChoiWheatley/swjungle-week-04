@@ -218,7 +218,36 @@ void rbtree_insert_fixup(rbtree *t, node_t *u) {
 }
 
 /// @brief u 서브트리의 부족한 black노드를 메꾸기 위한 과정
-void rbtree_delete_fixup(rbtree *t, node_t *u) {}
+void rbtree_delete_fixup(rbtree *t, node_t *u) {
+  while (u != t->root && u->color == RBTREE_BLACK) {
+    switch (rbtree_delete_case(t, u)) {
+      case (DeleteCase)RType1: {
+        continue;
+      }
+      case (DeleteCase)RType2: {
+        continue;
+      }
+      case (DeleteCase)RType3: {
+        // intentional fallthrough
+      }
+      case (DeleteCase)RType4: {
+        break;
+      }
+      case (DeleteCase)LType1: {
+        continue;
+      }
+      case (DeleteCase)LType2: {
+        continue;
+      }
+      case (DeleteCase)LType3: {
+        // intentional fallthrough
+      }
+      case (DeleteCase)LType4: {
+        break;
+      }
+    }
+  }
+}
 
 InsertCase rbtree_insert_case(rbtree *t, node_t *u, node_t *parent,
                               node_t *grandparent, node_t *uncle) {
@@ -250,6 +279,36 @@ InsertCase rbtree_insert_case(rbtree *t, node_t *u, node_t *parent,
     return (InsertCase)RRr;
   }
   return (InsertCase)RRb;
+}
+
+DeleteCase rbtree_delete_case(rbtree *t, node_t *u) {
+  node_t *p = u->parent;
+  node_t *w = p->left;
+  if (u == p->left) {
+    // LType?
+    node_t *w = p->right;
+    if (w->color == RBTREE_RED) {
+      return (DeleteCase)LType1;
+    }
+    if (w->right->color == RBTREE_RED) {
+      return (DeleteCase)LType4;
+    }
+    if (w->left->color == RBTREE_RED) {
+      return (DeleteCase)LType3;
+    }
+    return (DeleteCase)LType2;
+  }
+  // RType?
+  if (w->color == RBTREE_RED) {
+    return (DeleteCase)RType1;
+  }
+  if (w->right->color == RBTREE_RED) {
+    return (DeleteCase)RType4;
+  }
+  if (w->left->color == RBTREE_RED) {
+    return (DeleteCase)RType3;
+  }
+  return (DeleteCase)RType2;
 }
 
 /// @brief 노드 u를 기준으로 왼쪽 회전을 수행

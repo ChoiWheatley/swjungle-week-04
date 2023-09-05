@@ -15,37 +15,37 @@ typedef enum InsertCase { LLr, LRr, RLr, RRr, LLb, LRb, RLb, RRb } InsertCase;
 /**
  * # Delete Imbalance Cases
  *
- * 1. RType1: x's right sibling w is red
+ * 1. LType1: x's right sibling w is red
  *   → w의 색을 black으로 바꿔주기 위해 x.p에
  * left_rotate를 수행.
  *   → fallthrough to case 2, 3, 4
  *
- * 2. RType2: x's right sibling w is black, both of w's children are black
+ * 2. LType2: x's right sibling w is black, both of w's children are black
  *   → 잃어버린 black 하나를 x.p가 상환하도록 강제로 w를 red로 만들자.
  *   → continue to next iteration
  *
- * 3. RType3: x's right sibling w is black, left child of w is red, right child
+ * 3. LType3: x's right sibling w is black, left child of w is red, right child
  * of w is black
  *   → case 4로 만들기 위해 w를 기준으로 Right Rotation을 수행.
  *
- * 4. RType4: x's right sibling w is black, right child of w is red
+ * 4. LType4: x's right sibling w is black, right child of w is red
  *   → red node를 적극적으로 활용해 추가 black을 확보한다.
  *
- * 5. LType1: x's left sibling w is red
- * 6. LType2: x's left sibling w is black, both of w's children are black
- * 7. LType3: x's left sibling w is black, left child of w is red, right child
+ * 5. RType1: x's left sibling w is red
+ * 6. RType2: x's left sibling w is black, both of w's children are black
+ * 7. RType3: x's left sibling w is black, left child of w is red, right child
  * of w is black
- * 8. LType4: x's left sibling w is black, right child of w is red
+ * 8. RType4: x's left sibling w is black, right child of w is red
  */
 typedef enum DeleteCase {
-  RType1,
-  RType2,
-  RType3,
-  RType4,
   LType1,
   LType2,
   LType3,
-  LType4
+  LType4,
+  RType1,
+  RType2,
+  RType3,
+  RType4
 } DeleteCase;
 
 typedef int key_t;
@@ -80,6 +80,7 @@ void rbtree_insert_fixup(rbtree *t, node_t *u);
 void rbtree_delete_fixup(rbtree *t, node_t *u);
 InsertCase rbtree_insert_case(rbtree *t, node_t *u, node_t *parent,
                               node_t *grandparent, node_t *uncle);
+DeleteCase rbtree_delete_case(rbtree *t, node_t *u);
 void __rotate_left(rbtree *, node_t *u);
 void __rotate_right(rbtree *, node_t *u);
 void __transplant(rbtree *, node_t *u, node_t *v);
