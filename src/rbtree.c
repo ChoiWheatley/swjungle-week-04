@@ -136,11 +136,45 @@ void travel_bfs_mut(rbtree *t, void (*callback)(const rbtree *t, node_t *)) {
   }
 }
 
-void travel_dfs_mut(rbtree *, void (*callback)(const rbtree *t, node_t *)) {}
+void travel_dfs_mut(rbtree *t, void (*callback)(const rbtree *, node_t *)) {
+  Stack stack = {{NULL}, 0};
+  node_t *cur = t->root;
 
-node_t *subtree_min(rbtree *t, node_t *u) { return NULL; }
+  while (!stack_empty(&stack) || cur != t->nil) {
+    if (cur != t->nil) {
+      stack_push(&stack, cur);
+      cur = cur->left;
+    } else {
+      cur = stack_pop(&stack);
+      callback(t, cur);
+      cur = cur->right;
+    }
+  }
+}
 
-node_t *subtree_max(rbtree *t, node_t *u) { return NULL; }
+node_t *subtree_min(rbtree *t, node_t *u) {
+  node_t *cur = t->root;
+  node_t *prev = cur;
+
+  while (cur != t->nil) {
+    prev = cur;
+    cur = cur->left;
+  }
+
+  return prev;
+}
+
+node_t *subtree_max(rbtree *t, node_t *u) {
+  node_t *cur = t->root;
+  node_t *prev = cur;
+
+  while (cur != t->nil) {
+    prev = cur;
+    cur = cur->right;
+  }
+
+  return prev;
+}
 
 void free_node(const rbtree *t, node_t *node) { free(node); }
 
