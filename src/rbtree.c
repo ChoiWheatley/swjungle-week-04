@@ -93,8 +93,11 @@ int rbtree_to_array(const rbtree *t, key_t *arr, const size_t n) {
 
 /// @brief 노드 u를 기준으로 왼쪽 회전을 수행
 void __rotate_left(rbtree *t, node_t *u) {
-  if (!t || !u || u == t->nil) {
+  if (!t || !u || u == t->nil || u->left == t->nil) {
     return;
+  }
+  if (u == t->root) {
+    t->root = u->right;
   }
   node_t *right = u->right;
   u->right = right->left;
@@ -112,6 +115,9 @@ void __rotate_left(rbtree *t, node_t *u) {
 void __rotate_rght(rbtree *t, node_t *u) {
   if (!t || !u || u == t->nil) {
     return;
+  }
+  if (u == t->root) {
+    t->root = u->left;
   }
   node_t *left = u->left;
   u->left = left->right;
@@ -246,7 +252,7 @@ void print_node_verbose(const rbtree *t, const node_t *node) {
   if (node->parent != t->nil) {
     snprintf(sparent, MAX_STR, "%d", node->parent->key);
   }
-  printf("key: %s: (left: %s,right: %s, parent: %s)\n", skey, sleft, sright,
+  printf("key: %s: (left: %s, right: %s, parent: %s)\n", skey, sleft, sright,
          sparent);
 
 #undef MAX_STR
