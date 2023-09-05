@@ -39,7 +39,7 @@ node_t *rbtree_insert(rbtree *t, const key_t key) {
     // empty tree
     t->root = (node_t *)malloc(sizeof(node_t));
     *t->root = (node_t){RBTREE_BLACK, key, t->nil, t->nil, t->nil};
-    return t;
+    return t->root;
   }
 
   // 순회 돌면서 NIL까지 간다. 중복을 발견하면 오른쪽으로 이동.
@@ -133,7 +133,7 @@ int rbtree_to_array(const rbtree *t, key_t *arr, const size_t n) {
 }
 
 void rbtree_insert_fixup(rbtree *t, node_t *u) {
-  while (u != t->root && u->parent->color == RBTREE_BLACK) {
+  while (u != t->root && u->parent->color == RBTREE_RED) {
     node_t *pu = u->parent;
     node_t *gu = pu->parent;
     node_t *uncle = gu->right;
@@ -154,6 +154,8 @@ void rbtree_insert_fixup(rbtree *t, node_t *u) {
         u = gu;
         break;
       }
+      /// ??b imbalance
+      /// 회전이 들어간다.
       case (InsertCase)LRb: {
         __rotate_left(t, pu);
         node_t *tmp = u;
@@ -182,6 +184,7 @@ void rbtree_insert_fixup(rbtree *t, node_t *u) {
       }
     }
   }
+  t->root->color = RBTREE_BLACK;
 }
 
 void rbtree_delete_fixup(rbtree *t, node_t *u) {}
@@ -220,7 +223,7 @@ InsertCase rbtree_insert_case(rbtree *t, node_t *u, node_t *parent,
 
 /// @brief 노드 u를 기준으로 왼쪽 회전을 수행
 void __rotate_left(rbtree *t, node_t *u) {
-  if (!t || !u || u == t->nil || u->left == t->nil) {
+  if (!t || !u || u == t->nil) {
     return;
   }
   if (u == t->root) {
