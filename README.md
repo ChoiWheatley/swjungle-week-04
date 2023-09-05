@@ -1,5 +1,7 @@
 # Red-Black Tree 구현
 
+[블로그 내용 참조](https://choiwheatley.github.io/%EC%9D%B4%EC%A7%84%EA%B2%80%EC%83%89%ED%8A%B8%EB%A6%AC%20red%20black%20tree/)
+
 Balanced search tree로 많이 쓰이는 Red-black tree (이하 RB tree)를 C 언어로 구현하는 과제입니다.
 구현하는 추상 자료형 (ADT: abstract data type)은 ordered set, multiset 입니다.
 
