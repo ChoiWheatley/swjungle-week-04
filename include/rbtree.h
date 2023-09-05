@@ -2,7 +2,6 @@
 #define _RBTREE_H_
 
 #include <stddef.h>
-
 typedef enum { RBTREE_RED, RBTREE_BLACK } color_t;
 
 typedef int key_t;
@@ -58,6 +57,7 @@ void travel_dfs_mut(rbtree *, void (*callback)(const rbtree *t, node_t *));
 node_t *subtree_min(rbtree *, node_t *u);
 node_t *subtree_max(rbtree *, node_t *u);
 void free_node(const rbtree *t, node_t *node);
+int key_comp(const void *lhs, const void *rhs);
 #ifdef DEBUG
 void print_node_verbose(const rbtree *t, const node_t *node);
 void print_node(const rbtree *t, const node_t *node);
