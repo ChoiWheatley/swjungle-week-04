@@ -5,6 +5,28 @@
 Balanced search tree로 많이 쓰이는 Red-black tree (이하 RB tree)를 C 언어로 구현하는 과제입니다.
 구현하는 추상 자료형 (ADT: abstract data type)은 ordered set, multiset 입니다.
 
+## file structure
+
+```
+.
+├── basic				# my library test codes
+│   ├── array_pointer	# study array pointer and pointer array
+│   ├── bst				# impl basic BST insert and search
+│   ├── len				# fixme: `LEN` macro function
+│   ├── list			# linked list
+│   └── rbtree			# my propriety source code
+├── build				# auto created via CMake
+│   ├── CMakeFiles
+│   ├── basic
+│   ├── bin				# **/main.c will be compiled into this dir
+│   └── src
+├── include				# header files such as stack.h, queue.h
+├── src					# original rbtree directory which now is only used for submission (compiled via Makefile)
+└── test				# basic testing in tandem with `src` dir (also compiled via Makefile)
+```
+
+
+
 ## 구현 범위
 다음 기능들을 수행할 수 있도록 RB tree를 구현합니다.
 
