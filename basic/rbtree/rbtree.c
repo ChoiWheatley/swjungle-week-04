@@ -1,179 +1,18 @@
 #include "rbtree.h"
 
+#include <queue.h>
+#include <stack.h>
 #include <stdbool.h>
-#include <stddef.h>
 #include <stdlib.h>
-#include <string.h>
 
 #ifdef DEBUG
+
+#include <printers.h>
 #include <stdio.h>
-#endif  // DEBUG
 
-/**
- * # Insert Imbalance Cases
- *
- * XYz의 의미: X, Y는 각각 grandparent입장에서 parent의 위치, parent 입장에서
- * node의 위치를 나타낸다. z는 `b` 또는 `r`인데, 각각 uncle이 black node인지,
- * red node인지를 나타낸다.
- */
-typedef enum InsertCase { LLr, LRr, RLr, RRr, LLb, LRb, RLb, RRb } InsertCase;
-
-/**
- * # Delete Imbalance Cases
- *
- * 1. LType1: x's right sibling w is red
- * 2. LType2: x's right sibling w is black, both of w's children are black
- * 3. LType3: x's right sibling w is black, left child of w is red, right child
- * of w is black
- * 4. LType4: x's right sibling w is black, right child of w is red
- * 5. RType1: x's left sibling w is red
- * 6. RType2: x's left sibling w is black, both of w's children are black
- * 7. RType3: x's left sibling w is black, right child of w is red, left child
- * of w is black
- * 8. RType4: x's left sibling w is black, left child of w is red
- */
-typedef enum DeleteCase {
-  LType1,
-  LType2,
-  LType3,
-  LType4,
-  RType1,
-  RType2,
-  RType3,
-  RType4
-} DeleteCase;
+#endif
 
 typedef void Fn(rbtree *, node_t *);
-
-/**
- * helper functions
- */
-
-void rbtree_insert_fixup(rbtree *t, node_t *u);
-/**
- * 1. LType1: x's right sibling w is red
- *   → w의 색을 black으로 바꿔주기 위해 x.p에
- * left_rotate를 수행.
- *   → fallthrough to case 2, 3, 4
- *
- * 2. LType2: x's right sibling w is black, both of w's children are black
- *   → 잃어버린 black 하나를 x.p가 상환하도록 강제로 w를 red로 만들자.
- *   → continue to next iteration
- *
- * 3. LType3: x's right sibling w is black, left child of w is red, right child
- * of w is black
- *   → case 4로 만들기 위해 w를 기준으로 Right Rotation을 수행.
- *
- * 4. LType4: x's right sibling w is black, right child of w is red
- *   → red node를 적극적으로 활용해 추가 black을 확보한다.
- *
- * RType 부터는 대칭임.
- *
- */
-void rbtree_delete_fixup(rbtree *t, node_t *u);
-InsertCase rbtree_insert_case(rbtree *t, node_t *u, node_t *parent,
-                              node_t *grandparent, node_t *uncle);
-DeleteCase rbtree_delete_case(rbtree *t, node_t *u);
-void __rotate_left(rbtree *, node_t *u);
-void __rotate_right(rbtree *, node_t *u);
-void __transplant(rbtree *, node_t *u, node_t *v);
-void travel_bfs(const rbtree *,
-                void (*callback)(const rbtree *t, const node_t *));
-void travel_dfs(const rbtree *,
-                void (*callback)(const rbtree *t, const node_t *));
-void travel_bfs_mut(rbtree *, void (*callback)(const rbtree *t, node_t *));
-void travel_dfs_mut(rbtree *, void (*callback)(const rbtree *t, node_t *));
-node_t *subtree_min(const rbtree *, node_t *u);
-node_t *subtree_max(const rbtree *, node_t *u);
-void free_node(const rbtree *t, node_t *node);
-int key_comp(const void *lhs, const void *rhs);
-#ifdef DEBUG
-void print_node_verbose(const rbtree *t, const node_t *node);
-void print_node(const rbtree *t, const node_t *node);
-void bst_insert(rbtree *t, const key_t key);
-#endif  // DEBUG
-
-/**
- * Queue
- * @brief maxlength가 정해진 단순한 원형 큐
- */
-#define MAX_QUEUE 10000
-
-typedef struct node_q {
-  node_t *arrptr[MAX_QUEUE];
-  int head;
-  int tail;
-} Queue;
-
-bool queue_full(const Queue *queue);
-bool queue_empty(const Queue *queue);
-void queue_push(Queue *queue, node_t *new);
-node_t *queue_pop(Queue *queue);
-
-bool queue_full(const Queue *queue) {
-  return ((queue->tail + 1) % MAX_QUEUE) == queue->head;
-}
-
-bool queue_empty(const Queue *queue) { return queue->tail == queue->head; }
-
-void queue_push(Queue *queue, node_t *new) {
-  if (queue_full(queue)) {
-    // full, discard head's element
-    queue->head = (queue->head + 1) % MAX_QUEUE;
-  }
-  queue->tail = (queue->tail + 1) % MAX_QUEUE;
-  queue->arrptr[queue->tail] = new;
-}
-
-node_t *queue_pop(Queue *queue) {
-  if (queue->head == queue->tail) {
-    // no element
-    return NULL;
-  }
-  queue->head = (queue->head + 1) % MAX_QUEUE;
-  return queue->arrptr[queue->head];
-}
-
-/**
- * Stack
- * @brief maxlength가 정해진 단순 스택
- */
-#define MAX_STACK 10000
-
-typedef struct node_stack {
-  node_t *arrptr[MAX_STACK];
-  int top;
-} Stack;
-
-bool stack_full(const Stack *stack);
-bool stack_empty(const Stack *stack);
-bool stack_push(Stack *stack, node_t *new);
-node_t *stack_pop(Stack *stack);
-
-bool stack_full(const Stack *stack) { return stack->top >= MAX_STACK; }
-
-bool stack_empty(const Stack *stack) { return stack->top <= 0; }
-
-bool stack_push(Stack *stack, node_t *new) {
-  if (stack_full(stack)) {
-    return false;
-  }
-  stack->arrptr[stack->top] = new;
-  stack->top += 1;
-  return true;
-}
-
-node_t *stack_pop(Stack *stack) {
-  if (stack_empty(stack)) {
-    return NULL;
-  }
-  stack->top -= 1;
-  return stack->arrptr[stack->top];
-}
-
-/**
- * RBTREE
- */
 
 rbtree *new_rbtree(void) {
   rbtree *p = (rbtree *)malloc(sizeof(rbtree));
@@ -669,6 +508,8 @@ int key_comp(const void *lhs, const void *rhs) {
   return l - r;
 }
 
+#define COLOR_TO_CHAR(color) (color) ? 'b' : 'r'
+
 #ifdef DEBUG
 void print_node_verbose(const rbtree *t, const node_t *node) {
 #define MAX_STR 255
@@ -683,16 +524,19 @@ void print_node_verbose(const rbtree *t, const node_t *node) {
   }
   snprintf(skey, MAX_STR, "%d", node->key);
   if (node->left != t->nil) {
-    snprintf(sleft, MAX_STR, "%d", node->left->key);
+    snprintf(sleft, MAX_STR, "%d(%c)", node->left->key,
+             COLOR_TO_CHAR(node->left->color));
   }
   if (node->right != t->nil) {
-    snprintf(sright, MAX_STR, "%d", node->right->key);
+    snprintf(sright, MAX_STR, "%d(%c)", node->right->key,
+             COLOR_TO_CHAR(node->right->color));
   }
   if (node->parent != t->nil) {
-    snprintf(sparent, MAX_STR, "%d", node->parent->key);
+    snprintf(sparent, MAX_STR, "%d(%c)", node->parent->key,
+             COLOR_TO_CHAR(node->parent->color));
   }
-  printf("key: %s: (left: %s, right: %s, parent: %s)\n", skey, sleft, sright,
-         sparent);
+  printf("key: %s(%c): (left: %s, right: %s, parent: %s)\n", skey,
+         COLOR_TO_CHAR(node->color), sleft, sright, sparent);
 
 #undef MAX_STR
 }

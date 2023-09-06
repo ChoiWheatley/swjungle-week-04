@@ -5,7 +5,7 @@
  */
 #include <rbtree.h>
 #include <stdbool.h>
-#define MAX_QUEUE 1000
+#define MAX_QUEUE 10000
 
 typedef struct node_q {
   node_t *arrptr[MAX_QUEUE];

@@ -1,1 +1,1 @@
-#define LEN(arr, elem_t) sizeof arr / sizeof(#elem_t)
+#define LEN(arr, elem_t) sizeof arr / (sizeof(#elem_t))
