@@ -440,6 +440,7 @@ void rbtree_delete_fixup(rbtree *t, node_t *u) {
       case (DeleteCase)RType4: {
         node_t *w = p->left;
         w->left->color = RBTREE_BLACK;
+        w->color = p->color;
         p->color = RBTREE_BLACK;
         __rotate_right(t, p);
         return;

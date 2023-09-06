@@ -6,7 +6,7 @@
 #include <stdbool.h>
 
 #include "rbtree.h"
-#define MAX_STACK 10000
+#define MAX_STACK 20000
 
 typedef struct node_stack {
   node_t *arrptr[MAX_STACK];

@@ -279,6 +279,7 @@ void rbtree_delete_fixup(rbtree *t, node_t *u) {
       case (DeleteCase)RType4: {
         node_t *w = p->left;
         w->left->color = RBTREE_BLACK;
+        w->color = p->color;
         p->color = RBTREE_BLACK;
         __rotate_right(t, p);
         return;
@@ -507,6 +508,8 @@ int key_comp(const void *lhs, const void *rhs) {
   return l - r;
 }
 
+#define COLOR_TO_CHAR(color) (color) ? 'b' : 'r'
+
 #ifdef DEBUG
 void print_node_verbose(const rbtree *t, const node_t *node) {
 #define MAX_STR 255
@@ -521,16 +524,19 @@ void print_node_verbose(const rbtree *t, const node_t *node) {
   }
   snprintf(skey, MAX_STR, "%d", node->key);
   if (node->left != t->nil) {
-    snprintf(sleft, MAX_STR, "%d", node->left->key);
+    snprintf(sleft, MAX_STR, "%d(%c)", node->left->key,
+             COLOR_TO_CHAR(node->left->color));
   }
   if (node->right != t->nil) {
-    snprintf(sright, MAX_STR, "%d", node->right->key);
+    snprintf(sright, MAX_STR, "%d(%c)", node->right->key,
+             COLOR_TO_CHAR(node->right->color));
   }
   if (node->parent != t->nil) {
-    snprintf(sparent, MAX_STR, "%d", node->parent->key);
+    snprintf(sparent, MAX_STR, "%d(%c)", node->parent->key,
+             COLOR_TO_CHAR(node->parent->color));
   }
-  printf("key: %s: (left: %s, right: %s, parent: %s)\n", skey, sleft, sright,
-         sparent);
+  printf("key: %s(%c): (left: %s, right: %s, parent: %s)\n", skey,
+         COLOR_TO_CHAR(node->color), sleft, sright, sparent);
 
 #undef MAX_STR
 }
