@@ -97,7 +97,7 @@ void bst_insert(rbtree *t, const key_t key);
  * Queue
  * @brief maxlength가 정해진 단순한 원형 큐
  */
-#define MAX_QUEUE 1000
+#define MAX_QUEUE 10000
 
 typedef struct node_q {
   node_t *arrptr[MAX_QUEUE];
@@ -138,7 +138,7 @@ node_t *queue_pop(Queue *queue) {
  * Stack
  * @brief maxlength가 정해진 단순 스택
  */
-#define MAX_STACK 1000
+#define MAX_STACK 10000
 
 typedef struct node_stack {
   node_t *arrptr[MAX_STACK];
