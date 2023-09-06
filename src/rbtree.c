@@ -27,7 +27,6 @@ rbtree *new_rbtree(void) {
 }
 
 void delete_rbtree(rbtree *t) {
-  // TODO: DFS 순회를 돌면서 free를 해주자.
   travel_dfs_mut(t, free_node);
   free(t);
 }
@@ -102,9 +101,48 @@ node_t *rbtree_min(const rbtree *t) { return subtree_min(t, t->root); }
 
 node_t *rbtree_max(const rbtree *t) { return subtree_max(t, t->root); }
 
-int rbtree_erase(rbtree *t, node_t *p) {
-  // TODO: implement erase
-  return 0;
+/// @brief fixup 조건은 transplant 당한 노드의 색상이 black인 경우이다. 삭제시
+/// 노드의 자식이 둘일때 오른쪽 서브트리의 min을 찾아 transplant 한다.
+/// @return ??? 모르겠다 그냥 key 리턴해야쥐
+int rbtree_erase(rbtree *t, node_t *u) {
+  color_t origin_color = u->color;
+  node_t *x = u->left;
+
+  if (u->left == t->nil) {
+    x = u->right;
+    __transplant(t, u, u->right);
+  } else if (u->right == t->nil) {
+    x = u->left;
+    __transplant(t, u, u->left);
+  } else {
+    /**
+     * # left, right children exists
+     *
+     * 1. find minimum node(y) from right subtree
+     * 2. let x as y.right and transplant y, x even if x is NIL
+     * 3. transplant p, y so that p is finally replaced
+     */
+    node_t *y = subtree_min(t, u->right);
+    // Now we take care of y's subtree
+    origin_color = y->color;
+
+    x = y->right;
+
+    __transplant(t, y, x);  // x might be NIL, that's ok
+    // prepare y's recapture u's position
+    y->right = u->right;
+    y->right->parent = y;
+    __transplant(t, u, y);
+    y->left = u->left;
+    y->left->parent = y;
+    y->color = u->color;
+  }
+
+  if (origin_color == RBTREE_BLACK) {
+    rbtree_delete_fixup(t, x);
+  }
+
+  return u->key;
 }
 
 /// @brief Using DFS travelsal
@@ -124,6 +162,7 @@ int rbtree_to_array(const rbtree *t, key_t *arr, const size_t n) {
       cur = cur->right;
     }
   }
+  return n;
 }
 
 void rbtree_insert_fixup(rbtree *t, node_t *u) {
@@ -181,7 +220,70 @@ void rbtree_insert_fixup(rbtree *t, node_t *u) {
   t->root->color = RBTREE_BLACK;
 }
 
-void rbtree_delete_fixup(rbtree *t, node_t *u) {}
+void rbtree_delete_fixup(rbtree *t, node_t *u) {
+  node_t *x = u;
+  while (x != t->root && x->color == RBTREE_BLACK) {
+    node_t *p = x->parent;
+    switch (rbtree_delete_case(t, x)) {
+      case (DeleteCase)LType1: {
+        node_t *w = p->right;
+        w->color = p->color;
+        p->color = RBTREE_RED;
+        __rotate_left(t, p);
+        continue;
+      }
+      case (DeleteCase)LType2: {
+        node_t *w = p->right;
+        w->color = RBTREE_RED;
+        x = p;
+        continue;
+      }
+      case (DeleteCase)LType3: {
+        node_t *w = p->right;
+        w->left->color = RBTREE_BLACK;
+        w->color = RBTREE_RED;
+        __rotate_right(t, w);
+        // intentional fallthrough
+      }
+      case (DeleteCase)LType4: {
+        node_t *w = p->right;
+        w->right->color = RBTREE_BLACK;
+        w->color = p->color;
+        p->color = RBTREE_BLACK;
+        __rotate_left(t, p);
+        return;
+      }
+      case (DeleteCase)RType1: {
+        node_t *w = p->left;
+        w->color = p->color;
+        p->color = RBTREE_RED;
+        __rotate_right(t, p);
+        continue;
+      }
+      case (DeleteCase)RType2: {
+        node_t *w = p->left;
+        w->color = RBTREE_RED;
+        x = p;
+        continue;
+      }
+      case (DeleteCase)RType3: {
+        node_t *w = p->left;
+        w->right->color = RBTREE_BLACK;
+        w->color = RBTREE_RED;
+        __rotate_left(t, w);
+        // intentional fallthrough
+      }
+      case (DeleteCase)RType4: {
+        node_t *w = p->left;
+        w->left->color = RBTREE_BLACK;
+        p->color = RBTREE_BLACK;
+        __rotate_right(t, p);
+        return;
+      }
+    }
+  }
+  x->color = RBTREE_BLACK;
+}
 
 InsertCase rbtree_insert_case(rbtree *t, node_t *u, node_t *parent,
                               node_t *grandparent, node_t *uncle) {
@@ -213,6 +315,36 @@ InsertCase rbtree_insert_case(rbtree *t, node_t *u, node_t *parent,
     return (InsertCase)RRr;
   }
   return (InsertCase)RRb;
+}
+
+DeleteCase rbtree_delete_case(rbtree *t, node_t *u) {
+  node_t *p = u->parent;
+  node_t *w = p->left;
+  if (u == p->left) {
+    // LType?
+    w = p->right;
+    if (w->color == RBTREE_RED) {
+      return (DeleteCase)LType1;
+    }
+    if (w->right->color == RBTREE_RED) {
+      return (DeleteCase)LType4;
+    }
+    if (w->left->color == RBTREE_RED) {
+      return (DeleteCase)LType3;
+    }
+    return (DeleteCase)LType2;
+  }
+  // RType? Type3, Type4가 LType과 반대라는 점 주의
+  if (w->color == RBTREE_RED) {
+    return (DeleteCase)RType1;
+  }
+  if (w->left->color == RBTREE_RED) {
+    return (DeleteCase)RType4;
+  }
+  if (w->right->color == RBTREE_RED) {
+    return (DeleteCase)RType3;
+  }
+  return (DeleteCase)RType2;
 }
 
 /// @brief 노드 u를 기준으로 왼쪽 회전을 수행
@@ -256,7 +388,19 @@ void __rotate_right(rbtree *t, node_t *u) {
   left->right = u;
 }
 
-void __transplant(rbtree *t, node_t *u, node_t *v) {}
+/// @brief u 노드를 기존의 연결에서 제외하고 그 자리에 v를 넣는다.
+void __transplant(rbtree *t, node_t *u, node_t *v) {
+  node_t *parent = u->parent;
+  if (parent == t->nil) {
+    // u was root node
+    t->root = v;
+  } else if (u == parent->left) {
+    parent->left = v;
+  } else {
+    parent->right = v;
+  }
+  v->parent = parent;
+}
 
 void travel_bfs(const rbtree *t,
                 void (*callback)(const rbtree *t, const node_t *)) {
@@ -328,8 +472,8 @@ void travel_dfs_mut(rbtree *t, void (*callback)(const rbtree *, node_t *)) {
   }
 }
 
-node_t *subtree_min(rbtree *t, node_t *u) {
-  node_t *cur = t->root;
+node_t *subtree_min(const rbtree *t, node_t *u) {
+  node_t *cur = u;
   node_t *prev = cur;
 
   while (cur != t->nil) {
@@ -340,7 +484,7 @@ node_t *subtree_min(rbtree *t, node_t *u) {
   return prev;
 }
 
-node_t *subtree_max(rbtree *t, node_t *u) {
+node_t *subtree_max(const rbtree *t, node_t *u) {
   node_t *cur = t->root;
   node_t *prev = cur;
 
