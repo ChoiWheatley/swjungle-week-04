@@ -28,6 +28,7 @@ rbtree *new_rbtree(void) {
 
 void delete_rbtree(rbtree *t) {
   travel_dfs_mut(t, free_node);
+  free(t->nil);
   free(t);
 }
 
@@ -142,7 +143,9 @@ int rbtree_erase(rbtree *t, node_t *u) {
     rbtree_delete_fixup(t, x);
   }
 
-  return u->key;
+  key_t ret = u->key;
+  free(u);
+  return ret;
 }
 
 /// @brief Using DFS travelsal
@@ -465,9 +468,9 @@ void travel_dfs_mut(rbtree *t, void (*callback)(const rbtree *, node_t *)) {
       stack_push(&stack, cur);
       cur = cur->left;
     } else {
-      cur = stack_pop(&stack);
-      callback(t, cur);
-      cur = cur->right;
+      node_t *tmp = stack_pop(&stack);
+      cur = tmp->right;
+      callback(t, tmp);
     }
   }
 }
