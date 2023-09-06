@@ -128,7 +128,7 @@ int rbtree_erase(rbtree *t, node_t *u) {
 
     x = y->right;
 
-    __transplant(t, y, y->right);  // x might be NIL, that's ok
+    __transplant(t, y, x);  // x might be NIL, that's ok
     // prepare y's recapture u's position
     y->right = u->right;
     y->right->parent = y;
@@ -391,7 +391,10 @@ void __rotate_right(rbtree *t, node_t *u) {
 /// @brief u 노드를 기존의 연결에서 제외하고 그 자리에 v를 넣는다.
 void __transplant(rbtree *t, node_t *u, node_t *v) {
   node_t *parent = u->parent;
-  if (u == parent->left) {
+  if (parent == t->nil) {
+    // u was root node
+    t->root = v;
+  } else if (u == parent->left) {
     parent->left = v;
   } else {
     parent->right = v;
