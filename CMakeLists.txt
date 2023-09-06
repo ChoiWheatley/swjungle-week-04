@@ -26,7 +26,7 @@ add_custom_target(test
                   COMMAND make test
                   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})   
 
-add_subdirectory("src")
+add_subdirectory("basic/rbtree")
 
 # ################################################
 # compile source files
